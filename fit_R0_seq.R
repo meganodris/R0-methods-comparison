@@ -1,10 +1,15 @@
 #=== Function to fit each method to increasing number of time points ===#
 #=== in the epidemic growth phase and output results as csv's ===#
 
-fit_R0_seq <- function(data){
+fit_R0_seq <- function(data, mean_GT, sd_GT, GTd){
   
   # list to store results
   store <- list()
+  
+  # define the moment generating function of the GT distribution, g(a)
+  Mz_ga <- function(t, r){
+    dgamma(t, shape=(mean_GT^2/sd_GT^2), scale=(sd_GT^2/mean_GT))*exp(-t*r)
+  }
   
   # method names
   methods <- c("ExpLin", "ExpPois", "MLE_ExpLin", "EpiEstim", "WP")
