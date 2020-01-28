@@ -1,5 +1,5 @@
-#=== Function to fit each method to increasing number of time points ===#
-#=== in the epidemic growth phase and output results as csv's ===#
+#=== Function to estimate time-constant R0 with each method at sequential ===#
+#=== time points in the epidemic growth phase and output results as csv's ===#
 
 fit_R0_seq <- function(data, mean_GT, sd_GT, GTd){
   
@@ -42,6 +42,6 @@ fit_R0_seq <- function(data, mean_GT, sd_GT, GTd){
     
     # bind results by country and output as csv
     results_all <- do.call("rbind", store)
-    write.csv(results_all, paste(data$country[1], "Results.csv", sep="_"))
+    write.csv(results_all, paste(data$country[1], "Results.csv", sep="_"), row.names=FALSE)
   }
 }

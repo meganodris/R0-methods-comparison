@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1580218500653.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4115132842",
+    "id" : "6B6C62E4",
+    "lastKnownWriteTime" : 1580219539,
+    "last_content_update" : 1580219539726,
+    "path" : "~/GitHub/R0-methods-comparison/data_simulation.R",
+    "project_path" : "data_simulation.R",
+    "properties" : {
+        "cursorPosition" : "100,0",
+        "scrollLine" : "69"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
