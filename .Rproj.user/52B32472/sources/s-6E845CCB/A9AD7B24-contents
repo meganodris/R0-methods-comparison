@@ -1,0 +1,57 @@
+library(EpiEstim)
+library(R0)
+library(bbmle)
+
+setwd("C:/Users/Megan/Desktop/Zika R0")
+
+# Source function to fit methods
+source("R_estimation.R") 
+
+# Read in Zika case data
+cdata <- readRDS("ZikaCases_LatinAmerica&Caribbean.RDS")
+
+# exclude the countries where cases peaked earlier than 6 weeks (2 generation times)
+# (Antigua and Barbuda, Nicaragua, Venezuela)
+cdata <- cdata[c(2:22, 24:34, 36:37)]
+
+# set directory for outputting results
+output_path <- "C:/Users/Megan/Desktop/Zika R0/R0_LAC_results"
+
+
+
+#===== Apply function to each national case time series
+# running this in sequence locally may take a few hours
+for(i in 7:length(cdata)){
+  country_data <- cdata[[i]]
+  R_estimates(data=country_data, path=output_path)
+  print(i)
+}
+
+
+#===== Fit to simulated data
+
+# Read in data for fitting
+setwd("Q:/R0 analysis/Simulations/Run2")
+simsP <- readRDS("SimsP.RDS") # poisson noise
+simsNB <- readRDS("SimsNB.RDS") # neg binomial noise
+sims <- readRDS("Sims.RDS") # no noise
+
+# Fit to data with no noise
+for(i in 1:length(sims)){
+  sim_data_i <- sims[[i]]
+  R_estimates(data=sim_data_i, path="Q:/R0 analysis/Simulations/Run2/Results/Sims/")
+}
+
+# Fit to data with Poisson noise
+for(i in 1:length(sims)){
+  sim_data_i <- simsP[[i]]
+  R_estimates(data=sim_data_i, path="Q:/R0 analysis/Simulations/Run2/Results/SimsP/")
+}
+
+# Fit to data with Neg Binomial noise
+for(i in 1:length(sims)){
+  sim_data_i <- simsNB[[i]]
+  R_estimates(data=sim_data_i, path="Q:/R0 analysis/Simulations/Run2/Results/SimsNB/")
+}
+
+

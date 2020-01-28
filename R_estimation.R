@@ -1,10 +1,10 @@
-#====== Function to estimate time-constant R0 at different stages of the epidemic growth period ======#
+#====== Function to estimate time-constant R0 at sequential time points of the epidemic growth phase ======#
 
 R_estimates <- function(data, path){
   
   data <- as.data.frame(data)
   
-  # define a fixed mean and sd of the generation time distribution, GT
+  # define a fixed mean and SD of the generation time distribution, GT
   mean_GT <- 20/7
   sd_GT <- 7.4/7
   variance_GT <- sd_GT^2
@@ -21,7 +21,7 @@ R_estimates <- function(data, path){
   # dataframe to store results
   results <- data.frame(Country=NA, Nweeks=NA, method=NA, R0=NA, CI_L=NA, CI_U=NA)
   
-  # define peak: max time point of highest reported cases
+  # define peak - max time point of highest reported cases
   peak <- max.col(matrix(data$cases,nrow=1),"last") 
 
   
@@ -36,7 +36,7 @@ R_estimates <- function(data, path){
     # Loop to fit each method to each section with increasing number of time points
     for(j in 1:length(sections)){
   
-      # extract section for fitting
+      # extract section of the epidemic curve for fitting
       s <- data[1:sections[j], ]
       
       #======== 1. Linear Exponential Growth ========#
@@ -64,12 +64,12 @@ R_estimates <- function(data, path){
           #=== calculate 95% CI for R
           
           # stanard error of r
-          se_r <- coef(summary(m))[, "Std. Error"][2]
+          se_r <- coef(summary(lm_mod))[, "Std. Error"][2]
           
           # bootstrap sample from t-distribution
           boot <- vector()
           for(k in 1:10000){
-            rdf <- rt(1, df=(m$df.residual))
+            rdf <- rt(1, df=(lm_mod$df.residual))
             r_new <- abs(r + se_r*rdf) 
             int_ga_new <- integrate(Mz_ga, r=r_new, lower=0, upper=Inf, subdivisions=1e8)
             boot[k] <- 1/int_ga_new$value
@@ -106,12 +106,12 @@ R_estimates <- function(data, path){
           #=== calculate 95% CI for R
           
           # standard error of r
-          se_r_p <- coef(summary(mP))[, "Std. Error"][2]
+          se_r_p <- coef(summary(P_mod))[, "Std. Error"][2]
           
           # bootstrap sample from t-distribution
           R0exp_pois_CI <- vector()
           for(k in 1:10000){
-            rdf <- rt(1, df=(mP$df.residual))
+            rdf <- rt(1, df=(P_mod$df.residual))
             r_new <- abs(r_p + se_r_p*rdf)
             int_ga_new <- integrate(Mz_ga, r=r_new, lower=0, upper=Inf, subdivisions=1e8)
             R0exp_pois_CI[k] <- 1/int_ga_new$value
@@ -141,10 +141,10 @@ R_estimates <- function(data, path){
       # vectors & matrix for storing r, likelihood & CI estimates
       r_est <- vector()
       likel <- vector()
-      CI_r <- data.frame(matrix(ncol=2, nrow=100))
+      CI_mle <- data.frame(matrix(ncol=2, nrow=100))
       
       # run MLE from different starting points
-      for(m in 1:100){
+      for(m in 1:500){
         
         tryCatch({ # catch errors arising from negative r values and filter these before storing results
           est <- mle2(ll, start=list(I0=runif(1,1,10), r=runif(1,1,10)))
@@ -152,25 +152,22 @@ R_estimates <- function(data, path){
           # store values of r, likelihood & CI
           r_est[m] <- coef(est)[2]
           likel[m] <- logLik(est)
-          CI_r[m, ] <- c(confint(est, quietly=TRUE)[2,1], confint(est, quietly=TRUE)[2,2])
+          CI_mle[m, ] <- c(confint(est, quietly=TRUE)[2,1], confint(est, quietly=TRUE)[2,2])
           rm(est)
         }, error=function(e){})
       } 
       
       # take maximum likelihood estimates
       r_mle <- r_est[which.max(likel)]
-      CI_mle <- CI_r[which.max(likel), ]
+      ci_mle <- CI_mle[which.max(likel), ]
       
-      # check the validity of results (not NA & are above min_r)
-      if(is.na(CI_mle[1])+is.na(CI_mle[2])==0 & CI_mle[1]>min_r){
+      # check the validity of results (i.e. not NA & are above min_r)
+      if(is.na(ci_mle[1])+is.na(ci_mle[2])==0 & ci_mle[1]>min_r){
     
         # calculate R by integrating over the GT distribution, g(a)
-        int_ga <- integrate(Mz_ga, r=r_mle, lower=0, upper=Inf, subdivisions=1e8)
-        int_gaCIL <- integrate(Mz_ga, r=CI_mle[1,1], lower=0, upper=Inf, subdivisions=1e8)
-        int_gaCIU <- integrate(Mz_ga, r=CI_mle[1,2], lower=0, upper=Inf, subdivisions=1e8)
-        R <- 1/int_ga$value
-        R_CIL <- 1/int_gaCIL$value
-        R_CIU <- 1/int_gaCIU$value
+        R <- 1/(integrate(Mz_ga, r=r_mle, lower=0, upper=Inf, subdivisions=1e8))$value
+        R_CIL <- 1/(integrate(Mz_ga, r=CI_mle[1,1], lower=0, upper=Inf, subdivisions=1e8))$value
+        R_CIU <- 1/(integrate(Mz_ga, r=CI_mle[1,2], lower=0, upper=Inf, subdivisions=1e8))$value
         
         # store results
         count <- count+1

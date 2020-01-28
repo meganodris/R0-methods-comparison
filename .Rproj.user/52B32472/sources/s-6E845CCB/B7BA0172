@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1580122885604.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "B7BA0172",
+    "lastKnownWriteTime" : 1580131695,
+    "last_content_update" : 1580131695864,
+    "path" : "~/GitHub/R0-methods-comparison/R_estimation.R",
+    "project_path" : "R_estimation.R",
+    "properties" : {
+        "cursorPosition" : "21,81",
+        "scrollLine" : "0",
+        "source_window_id" : ""
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
