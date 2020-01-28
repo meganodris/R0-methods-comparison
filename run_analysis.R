@@ -2,8 +2,8 @@ library(dplyr)
 library(bbmle)
 library(EpiEstim)
 library(R0)
-library(deSolve)
 library(ggplot2)
+library(deSolve)
 library(truncnorm)
 
 # specify repository path 
@@ -85,3 +85,10 @@ for(i in 1:length(zika_LAC)){
   
   print(paste("Finished", data_i$country[1], sep=" "))
 }
+
+# plot R0 estimates against case time series
+plots <- list()
+for(i in 1:length(zika_LAC)){
+  plots[[i]] <- plotting_R0(case_data=zika_LAC[[i]], R0_ests=LAC_results[[i]])
+}
+
