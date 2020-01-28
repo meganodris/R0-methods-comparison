@@ -42,10 +42,10 @@ for(i in 1:3){
     
     # data for fitting - simulation j with noise level i
     sim_ij <- data.frame(week=1:nrow(simulations[[i]]), cases=simulations[[i]][ ,j], 
-                         country=paste(names(simulations[i]), j, sep='_'))
+                         country=paste("sim", j, sep='_'))
+    
     # fit & store results
     results_i[[j]] <- fit_R0_seq(data=sim_ij, mean_GT=20/7, sd_GT=7.4/7, GTd=GTd)
-    
   }
   
   # store results from each noise level
