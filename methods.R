@@ -1,6 +1,11 @@
+#=== Define the moment generating function of the GT distribution, g(a)
+Mz_ga <- function(t, r, mean_GT, sd_GT){
+  dgamma(t, shape=(mean_GT^2/sd_GT^2), scale=(sd_GT^2/mean_GT))*exp(-t*r)
+}
+
 
 #=== 1. Linear exponential growth method
-EG_Lin <- function(data){
+EG_Lin <- function(data, mean_GT, sd_GT){
   
   # log transform cases, add small constant to time-series if zeros are present
   if(any(data$cases==0)){
@@ -17,7 +22,7 @@ EG_Lin <- function(data){
   if(r>0){ 
     
     # calculate R by integrating over the GT distribution, g(a)
-    int_ga <- integrate(Mz_ga, r=r, lower=0, upper=Inf, subdivisions=1e8)
+    int_ga <- integrate(Mz_ga, r=r, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)
     R <- 1/int_ga$value
     
     #=== calculate 95% CI for R
@@ -30,7 +35,7 @@ EG_Lin <- function(data){
     for(k in 1:10000){
       rdf <- rt(1, df=(lm_mod$df.residual))
       r_new <- abs(r + se_r*rdf) 
-      int_ga_new <- integrate(Mz_ga, r=r_new, lower=0, upper=Inf, subdivisions=1e8)
+      int_ga_new <- integrate(Mz_ga, r=r_new, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)
       boot[k] <- 1/int_ga_new$value
     }
     results <- c(R, quantile(boot, c(0.025,0.975), na.rm=TRUE))
@@ -43,7 +48,7 @@ EG_Lin <- function(data){
 
 
 #=== 2. Poisson exponential growth method
-EG_P <- function(data){
+EG_P <- function(data, mean_GT, sd_GT){
   
   # define growth rate, r
   P_mod <- glm(cases~ week, data=data, family="poisson")
@@ -52,7 +57,7 @@ EG_P <- function(data){
   if(r_p>0){
     
     # calculate R by integrating over the GT distribution, g(a)
-    int_ga <- integrate(Mz_ga, r=r_p, lower=0, upper=Inf, subdivisions=1e8)
+    int_ga <- integrate(Mz_ga, r=r_p, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)
     R_p <- 1/int_ga$value
     
     #=== calculate 95% CI for R
@@ -65,7 +70,7 @@ EG_P <- function(data){
     for(k in 1:10000){
       rdf <- rt(1, df=(P_mod$df.residual))
       r_new <- abs(r_p + se_r_p*rdf)
-      int_ga_new <- integrate(Mz_ga, r=r_new, lower=0, upper=Inf, subdivisions=1e8)
+      int_ga_new <- integrate(Mz_ga, r=r_new, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)
       R0exp_pois_CI[k] <- 1/int_ga_new$value
       
     }
@@ -79,7 +84,7 @@ EG_P <- function(data){
 
 #=== 3. Maximum likelihood exponential growth method
 
-EG_MLE <- function(data){
+EG_MLE <- function(data, mean_GT, sd_GT){
   
   # define log-likelihood (negative required by mle2)
   ll <- function(I0, r){
@@ -113,9 +118,9 @@ EG_MLE <- function(data){
   if(is.na(ci_mle[1])+is.na(ci_mle[2])==0 & ci_mle[1]>-0.38){
     
     # calculate R by integrating over the GT distribution, g(a)
-    R <- 1/(integrate(Mz_ga, r=r_mle, lower=0, upper=Inf, subdivisions=1e8))$value
-    R_CIL <- 1/(integrate(Mz_ga, r=CI_mle[1,1], lower=0, upper=Inf, subdivisions=1e8))$value
-    R_CIU <- 1/(integrate(Mz_ga, r=CI_mle[1,2], lower=0, upper=Inf, subdivisions=1e8))$value
+    R <- 1/(integrate(Mz_ga, r=r_mle, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT))$value
+    R_CIL <- 1/(integrate(Mz_ga, r=CI_mle[1,1], lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT))$value
+    R_CIU <- 1/(integrate(Mz_ga, r=CI_mle[1,2], lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT))$value
     
     results <- c(R, R_CIL, R_CIU)
     
@@ -128,10 +133,10 @@ EG_MLE <- function(data){
 
 #=== 4. EpiEstim method
 
-epiestim <- function(data, mean_si, std_si){
+epiestim <- function(data, mean_GT, sd_GT){
   
   R_EpiEstim <- EpiEstim::estimate_R(data$cases, method="parametric_si", 
-                                     config=make_config(list(mean_si=20/7, std_si=7.4/7,
+                                     config=make_config(list(mean_si=mean_GT, std_si=sd_GT,
                                                              t_start=2, t_end=as.numeric(nrow(data)))))
   if(exists("R_EpiEstim")==TRUE){
     results <- c(R_EpiEstim$R$`Mean(R)`, R_EpiEstim$R$`Quantile.0.025(R)`, R_EpiEstim$R$`Quantile.0.975(R)`)

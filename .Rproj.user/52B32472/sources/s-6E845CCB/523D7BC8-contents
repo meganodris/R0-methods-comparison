@@ -24,10 +24,10 @@ fit_R0_seq <- function(data, mean_GT, sd_GT, GTd){
       s_t <- data[1:sections[t], ]
       
       # fit each method
-      exp_lin <- EG_Lin(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
-      exp_pois <- EG_P(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
-      exp_mle <- EG_MLE(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
-      epiest <- epiestim(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
+      exp_lin <- EG_Lin(data=s_t)
+      exp_pois <- EG_P(data=s_t)
+      exp_mle <- EG_MLE(data=s_t)
+      epiest <- epiestim(data=s_t, mean_si=mean_GT, std_si=sd_GT)
       wp <- WP(data=s_t, GTd=GTd)
       
       # store results
