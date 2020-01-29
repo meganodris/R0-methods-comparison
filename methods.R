@@ -160,4 +160,29 @@ WP <- function(data, GTd){
   }else{
     results <- c(NA, NA, NA)
   }
+  return(results)
 }
+
+#=== 6. Wallinga and Teunis method (time-varying)
+
+WT <- function(data, GTd){
+  
+  tryCatch({
+    
+    # estimate time-dependant R0
+    R0_WT <- R0::est.R0.TD(data$cases, GT=GTd, correct=TRUE)
+    
+    # smooth the time-dependant estimates across period of interest
+    R0_WTav <- R0::smooth.Rt(R0_WT, time.period=(nrow(data)-1))
+    
+  }, error=function(e){})
+  
+  if(exists("R0_WTav")==TRUE){
+    results <- c(R0_WTav$R, R0_WTav$conf.int)
+  }else{
+    results <- c(NA, NA, NA)
+  }
+  return(results)
+}
+
+
