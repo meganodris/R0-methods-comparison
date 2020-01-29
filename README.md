@@ -12,5 +12,6 @@
    - no noise
    - Poisson noise
    - Negative Binomial noise
+- 'R0_plots.R'contains a function to plot R0 estimates over time against the corresponding case time series.
 
 
