@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1580318794925.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "326873121",
+    "id" : "1068EE1C",
+    "lastKnownWriteTime" : 1580318838,
+    "last_content_update" : 1580318838504,
+    "path" : "~/GitHub/R0-methods-comparison/assess_performance.R",
+    "project_path" : "assess_performance.R",
+    "properties" : {
+        "cursorPosition" : "84,1",
+        "scrollLine" : "53",
+        "tempName" : "Untitled2"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
