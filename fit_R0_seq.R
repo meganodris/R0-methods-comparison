@@ -1,7 +1,7 @@
 #=== Function to estimate time-constant R0 with each method at sequential ===#
 #=== time points in the epidemic growth phase and output results as csv's ===#
 
-fit_R0_seq <- function(data, mean_GT, sd_GT, GTd){
+fit_R0_seq <- function(data, mean_GT, sd_GT, GTd, GT_week){
   
   # list to store results
   store <- list()
@@ -14,8 +14,8 @@ fit_R0_seq <- function(data, mean_GT, sd_GT, GTd){
   
   if(peak>=6){
     
-    # define sections: from 6 weeks, by 3, up to peak (i.e. 6,9,12,15...)
-    sections <- seq(from=6, to=peak, by=3)
+    # define sections: from 2 generation times (approximated in terms of weeks) on, up to peak
+    sections <- seq(from=GT_week*2, to=peak, by=GT_week)
     
     # Loop to fit each method to each section with increasing number of time points
     for(t in 1:length(sections)){
