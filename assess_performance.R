@@ -83,3 +83,43 @@ performance_metrics <- function(trueR0, estimates, max_weeks){
   }
   return(list(metrics_summ=metrics, metrics_indiv=estimates))
 }
+
+
+# function to return a vector of metric names
+get_metrics <- function(){
+  
+  m_names <- c('Rsquared', 'Slope', 'PCC', 'SCC', 'RMSE', 'MAE', 'Uncertainty', 'Coverage',
+               'Bias', 'Freq_overest', 'Freq_underest', 'Bias_overest', 'Bias_underest')
+  return(m_names)
+}
+
+# metrics summary plot
+summary_plot <- function(metrics_summ, include){
+  
+  # reformat & keep only metrics of interest 
+  colnames(metrics_summ)[3:15] <- get_metrics()
+  met <- tidyr::gather(metrics_summ, key='metrics', value='value', Rsquared:Bias_underest)
+  met <- met[met$metrics %in% include, ]
+  
+  # plot
+  met$Nweeks <- factor(met$Nweeks, levels=c(6,9,12,15))
+  met$method <- factor(met$method, levels=c('ExpLin', 'ExpPois', 'MLE_ExpLin', 'EpiEstim', 'WP'))
+  plotM <- ggplot(met, aes(Nweeks, as.numeric(value), colour=method, shape=method))+ geom_point()+ 
+    facet_wrap(~metrics, scales="free_y")+ ylab('Performance')+ xlab('Number of weeks')+
+    scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1"))
+  
+  return(plotM)
+}
+
+bias_plot <- function(metrics_indiv){
+  
+  metrics_indiv$method <- factor(metrics_indiv$method, levels=c('ExpLin', 'ExpPois', 'MLE_ExpLin', 'EpiEstim', 'WP'))
+  plotB <- ggplot(metrics_indiv)+ geom_density_ridges(aes(x=bias, y=method, fill=method, col=method), scale=0.95)+
+    facet_grid(~Nweeks)+ geom_vline(xintercept=0)+ xlab('bias')+ theme_minimal()+ ylab('')+
+    scale_fill_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1"))+
+    scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1"))+
+    theme(legend.position='right', axis.text.y=element_blank())+ scale_x_continuous(expand = c(0, 0))+
+    scale_y_discrete(expand=expand_scale(mult=c(0.01, 0.01)), limits=rev(levels(metrics_indiv$method)))
+  
+  return(plotB)  
+}
