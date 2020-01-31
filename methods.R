@@ -107,7 +107,7 @@ EG_MLE <- function(data, mean_GT, sd_GT){
       likel[m] <- logLik(est)
       CI_mle[m, ] <- c(confint(est, quietly=TRUE)[2,1], confint(est, quietly=TRUE)[2,2])
       rm(est)
-    }, error=function(e){})
+    }, error=function(e){print(paste("Exponential growth (MLE): Unable to estimate R0 with current data"))})
   } 
   
   # take maximum likelihood estimates
@@ -135,9 +135,12 @@ EG_MLE <- function(data, mean_GT, sd_GT){
 
 epiestim <- function(data, mean_GT, sd_GT){
   
-  R_EpiEstim <- EpiEstim::estimate_R(data$cases, method="parametric_si", 
-                                     config=make_config(list(mean_si=mean_GT, std_si=sd_GT,
-                                                             t_start=2, t_end=as.numeric(nrow(data)))))
+  tryCatch({
+    R_EpiEstim <- EpiEstim::estimate_R(data$cases, method="parametric_si", 
+                                       config=make_config(list(mean_si=mean_GT, std_si=sd_GT,
+                                                               t_start=2, t_end=as.numeric(nrow(data)))))
+  }, error=function(e){print(paste("EpiEstim: Unable to estimate R0 with current data"))})
+  
   if(exists("R_EpiEstim")==TRUE){
     results <- c(R_EpiEstim$R$`Mean(R)`, R_EpiEstim$R$`Quantile.0.025(R)`, R_EpiEstim$R$`Quantile.0.975(R)`)
   } else {
@@ -153,7 +156,7 @@ WP <- function(data, GTd){
   
   tryCatch({
     R0_WP <- R0::est.R0.ML(data$cases, GT=GTd, begin=1, end=as.numeric(nrow(data)))
-  }, error=function(e){})
+  }, error=function(e){print(paste("White & Pagano: Unable to estimate R0 with current data"))})
   
   if(exists("R0_WP")==TRUE){
     results <- c(R0_WP$R, R0_WP$conf.int)
@@ -175,7 +178,7 @@ WT <- function(data, GTd){
     # smooth the time-dependant estimates across period of interest
     R0_WTav <- R0::smooth.Rt(R0_WT, time.period=(nrow(data)-1))
     
-  }, error=function(e){})
+  }, error=function(e){print(paste("Wallinga & Teunis: Unable to estimate R0 with current data"))})
   
   if(exists("R0_WTav")==TRUE){
     results <- c(R0_WTav$R, R0_WTav$conf.int)

@@ -47,7 +47,7 @@ performance_metrics <- function(trueR0, estimates, max_weeks){
       estimates$covYN[c] <- 0
     }
   }
-  
+
   # summarize method performance at each stage
   metrics <- data.frame(Nweeks=NA, method=NA, r2=NA, slope=NA, pcc=NA, scc=NA, rmse=NA, mae=NA,
                         CIwidth=NA, cov=NA, abs_bias=NA, freq_O=NA, freq_U=NA, mag_O=NA, mag_U=NA)
@@ -103,22 +103,25 @@ summary_plot <- function(metrics_summ, include){
   
   # plot
   met$Nweeks <- factor(met$Nweeks, levels=c(6,9,12,15))
-  met$method <- factor(met$method, levels=c('ExpLin', 'ExpPois', 'MLE_ExpLin', 'EpiEstim', 'WP'))
+  met$method <- factor(met$method, levels=c('ExpLin', 'ExpPois', 'MLE_ExpLin', 'EpiEstim', 'WP', 'WT'))
   plotM <- ggplot(met, aes(Nweeks, as.numeric(value), colour=method, shape=method))+ geom_point()+ 
     facet_wrap(~metrics, scales="free_y")+ ylab('Performance')+ xlab('Number of weeks')+
-    scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1"))
+    scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple"))
   
   return(plotM)
 }
 
+
+# bias distribution plot: estimated R0 - actual R0
 bias_plot <- function(metrics_indiv){
   
-  metrics_indiv$method <- factor(metrics_indiv$method, levels=c('ExpLin', 'ExpPois', 'MLE_ExpLin', 'EpiEstim', 'WP'))
-  plotB <- ggplot(metrics_indiv)+ geom_density_ridges(aes(x=bias, y=method, fill=method, col=method), scale=0.95)+
-    facet_grid(~Nweeks)+ geom_vline(xintercept=0)+ xlab('bias')+ theme_minimal()+ ylab('')+
-    scale_fill_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1"))+
-    scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1"))+
-    theme(legend.position='right', axis.text.y=element_blank())+ scale_x_continuous(expand = c(0, 0))+
+  metrics_indiv$method <- factor(metrics_indiv$method, levels=c('ExpLin', 'ExpPois', 'MLE_ExpLin', 'EpiEstim', 'WP', 'WT'))
+  plotB <- ggplot(metrics_indiv)+ ylab('')+ scale_x_continuous(expand=c(0, 0))+ theme_minimal()+
+    geom_density_ridges(aes(x=bias, y=method, fill=method, col=method), scale=0.95, alpha=0.5, bandwidth=0.25)+
+    facet_grid(~Nweeks)+ geom_vline(xintercept=0)+ xlab('bias')+ 
+    scale_fill_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple"))+
+    scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple"))+
+    theme(legend.position='right', axis.text.y=element_blank(), axis.ticks.y=element_blank())+ 
     scale_y_discrete(expand=expand_scale(mult=c(0.01, 0.01)), limits=rev(levels(metrics_indiv$method)))
   
   return(plotB)  
