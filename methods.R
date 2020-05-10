@@ -22,23 +22,16 @@ EG_Lin <- function(data, mean_GT, sd_GT){
   if(r>0){ 
     
     # calculate R by integrating over the GT distribution, g(a)
-    int_ga <- integrate(Mz_ga, r=r, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)
-    R <- 1/int_ga$value
+    R <- 1/integrate(Mz_ga, r=r, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
     
-    #=== calculate 95% CI for R
+    # calculate 95% CI for R
+    rciL <- confint(lm_mod, level=0.95)[2,1]
+    rciU <- confint(lm_mod, level=0.95)[2,2]
+    RciL <- 1/integrate(Mz_ga, r=rciL, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
+    RciU <- 1/integrate(Mz_ga, r=rciU, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
     
-    # stanard error of r
-    se_r <- coef(summary(lm_mod))[, "Std. Error"][2]
+    results <- c(R, RciL, RciU)
     
-    # bootstrap sample from t-distribution
-    boot <- vector()
-    for(k in 1:10000){
-      rdf <- rt(1, df=(lm_mod$df.residual))
-      r_new <- abs(r + se_r*rdf) 
-      int_ga_new <- integrate(Mz_ga, r=r_new, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)
-      boot[k] <- 1/int_ga_new$value
-    }
-    results <- c(R, quantile(boot, c(0.025,0.975), na.rm=TRUE))
   }else{
     results <- c(NA, NA, NA)
   }
@@ -57,24 +50,16 @@ EG_P <- function(data, mean_GT, sd_GT){
   if(r_p>0){
     
     # calculate R by integrating over the GT distribution, g(a)
-    int_ga <- integrate(Mz_ga, r=r_p, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)
-    R_p <- 1/int_ga$value
+    R_p <- 1/integrate(Mz_ga, r=r_p, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
     
-    #=== calculate 95% CI for R
+    # calculate 95% CI for R
+    rciL <- confint(P_mod, level=0.95)[2,1]
+    rciU <- confint(P_mod, level=0.95)[2,2]
+    RciL <- 1/integrate(Mz_ga, r=rciL, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
+    RciU <- 1/integrate(Mz_ga, r=rciU, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
     
-    # standard error of r
-    se_r_p <- coef(summary(P_mod))[, "Std. Error"][2]
-    
-    # bootstrap sample from t-distribution
-    R0exp_pois_CI <- vector()
-    for(k in 1:10000){
-      rdf <- rt(1, df=(P_mod$df.residual))
-      r_new <- abs(r_p + se_r_p*rdf)
-      int_ga_new <- integrate(Mz_ga, r=r_new, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)
-      R0exp_pois_CI[k] <- 1/int_ga_new$value
-      
-    }
-    results <- c(R_p, quantile(R0exp_pois_CI, c(0.025, 0.975), na.rm=TRUE))
+    results <- c(R_p, RciL, RciU)
+  
   }else{
     results <- c(NA, NA, NA)
   }
@@ -173,7 +158,7 @@ WT <- function(data, GTd){
   tryCatch({
     
     # estimate time-dependant R0
-    R0_WT <- R0::est.R0.TD(data$cases, GT=GTd, correct=TRUE)
+    R0_WT <- R0::est.R0.TD(data$cases, GT=GTd, correct=TRUE, begin=1, end=as.numeric(nrow(data)))
     
     # smooth the time-dependant estimates across period of interest
     R0_WTav <- R0::smooth.Rt(R0_WT, time.period=(nrow(data)-1))

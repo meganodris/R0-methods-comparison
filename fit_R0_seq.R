@@ -7,7 +7,7 @@ fit_R0_seq <- function(data, mean_GT, sd_GT, GTd, GT_week){
   store <- list()
   
   # method names
-  methods <- c("ExpLin", "ExpPois", "MLE_ExpLin", "EpiEstim", "WP", "WT")
+  methods <- c("EG_Lin", "EG_P", "EG_MLE", "EpiEstim", "WP", "WT")
   
   # define peak - max time point of highest reported cases
   peak <- which.max(data$cases)[length(which.max(data$cases))] 
