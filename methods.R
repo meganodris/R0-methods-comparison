@@ -18,15 +18,15 @@ EG_Lin <- function(data, mean_GT, sd_GT){
   # define growth rate, r
   lm_mod <- lm(logcases~ week, data=data)
   r <- coef(lm_mod)[2]
+  rciL <- confint(lm_mod, level=0.95)[2,1]
+  rciU <- confint(lm_mod, level=0.95)[2,2]
   
-  if(r>0){ 
+  if(rciL>-0.38){ 
     
     # calculate R by integrating over the GT distribution, g(a)
     R <- 1/integrate(Mz_ga, r=r, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
     
     # calculate 95% CI for R
-    rciL <- confint(lm_mod, level=0.95)[2,1]
-    rciU <- confint(lm_mod, level=0.95)[2,2]
     RciL <- 1/integrate(Mz_ga, r=rciL, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
     RciU <- 1/integrate(Mz_ga, r=rciU, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
     
@@ -46,15 +46,15 @@ EG_P <- function(data, mean_GT, sd_GT){
   # define growth rate, r
   P_mod <- glm(cases~ week, data=data, family="poisson")
   r_p <- coef(P_mod)[2]
+  rciL <- confint(P_mod, level=0.95)[2,1]
+  rciU <- confint(P_mod, level=0.95)[2,2]
   
-  if(r_p>0){
+  if(rciL>-0.38){
     
     # calculate R by integrating over the GT distribution, g(a)
     R_p <- 1/integrate(Mz_ga, r=r_p, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
     
     # calculate 95% CI for R
-    rciL <- confint(P_mod, level=0.95)[2,1]
-    rciU <- confint(P_mod, level=0.95)[2,2]
     RciL <- 1/integrate(Mz_ga, r=rciL, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
     RciU <- 1/integrate(Mz_ga, r=rciU, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
     
