@@ -1,4 +1,6 @@
 #=== Function to plot R0 estimates against case data
+library(cowplot)
+library(ggplot2)
 
 plotting_R0 <- function(case_data, R0_ests){
   
@@ -13,7 +15,7 @@ plotting_R0 <- function(case_data, R0_ests){
   R0_ests$mpt[which(R0_ests$Nweeks!=6)] <- R0_ests$Nweeks[which(R0_ests$Nweeks!=6)]-1
   
   # order methods
-  R0_ests$method <- factor(R0_ests$method, levels=c("ExpLin", "ExpPois", "MLE_ExpLin", "EpiEstim", "WP"))
+  R0_ests$method <- factor(R0_ests$method, levels=c("EG_Lin", "EG_P", "EG_MLE", "EpiEstim", "WP", 'WT'))
   
   # plot of case numbers over time
   p1 <- ggplot(case_data, aes(week, cases))+ ggtitle(case_data$country[1])+ theme_grey()+ 
@@ -29,10 +31,10 @@ plotting_R0 <- function(case_data, R0_ests){
     geom_rect(xmin=-Inf, xmax=sections[length(sections)]+0.5, ymin=-Inf, ymax=Inf, fill="white")+
     geom_point(aes(colour=method), position=position_dodge(width=2), size=2)+ ylab("R0")+  
     geom_errorbar(aes(colour=method), position=position_dodge(width=2))+ xlab("Weeks")+
-    theme(axis.line=element_line(), legend.position="bottom", plot.margin=unit(c(0,5.5,5.5,5.5), "pt"), 
+    theme(axis.line=element_line(), legend.position="none", plot.margin=unit(c(0,5.5,5.5,5.5), "pt"), 
           axis.title.x=element_blank())+ xlim(1,max(case_data$week))+
-    scale_color_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1"),
-                       labels=c("EG_Lin", "EG_P", "EG_MLE", "EpiEstim", "WP"))+
+    scale_color_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", 'purple'),
+                       labels=c("EG_Lin", "EG_P", "EG_MLE", "EpiEstim", "WP", 'WT'))+
     geom_vline(xintercept=sections+0.5, linetype="dashed", colour="grey")
   
   # bind the 2 plots & return
