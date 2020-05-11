@@ -21,7 +21,7 @@ EG_Lin <- function(data, mean_GT, sd_GT){
   rciL <- confint(lm_mod, level=0.95)[2,1]
   rciU <- confint(lm_mod, level=0.95)[2,2]
   
-  if(rciL>-0.38){ 
+  if(rciL>-0.37){ 
     
     # calculate R by integrating over the GT distribution, g(a)
     R <- 1/integrate(Mz_ga, r=r, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
@@ -49,7 +49,7 @@ EG_P <- function(data, mean_GT, sd_GT){
   rciL <- confint(P_mod, level=0.95)[2,1]
   rciU <- confint(P_mod, level=0.95)[2,2]
   
-  if(rciL>-0.38){
+  if(rciL>-0.37){
     
     # calculate R by integrating over the GT distribution, g(a)
     R_p <- 1/integrate(Mz_ga, r=r_p, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT)$value
