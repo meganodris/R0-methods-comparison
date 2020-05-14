@@ -32,8 +32,8 @@ fit_R0_seq <- function(data, mean_GT, sd_GT, GTd, GT_week){
       wt <- WT(data=s_t, GTd=GTd)
       
       # store results
-      store[[t]] <- cbind(paste(data$country[1]), sections[t], methods, rbind(eglin, egp, egmle, epiest, wp, wt))
-      colnames(store[[t]]) <- c("Country", "Nweeks", "method", "R0", "CI_L", "CI_U")
+      store[[t]] <- cbind(paste(data$country[1]), sections[t], methods, rbind(eglin, egp, egmle, epiest, wp, wt), peak)
+      colnames(store[[t]]) <- c("Country", "Nweeks", "method", "R0", "CI_L", "CI_U", "peak")
     }
     
     # bind results by country and output as csv
