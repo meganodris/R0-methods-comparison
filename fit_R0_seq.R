@@ -7,7 +7,7 @@ fit_R0_seq <- function(data, mean_GT, sd_GT, GTd, GT_week){
   store <- list()
   
   # method names
-  methods <- c("ExpLin", "ExpPois", "MLE_ExpLin", "EpiEstim", "WP", "WT")
+  methods <- c("EG_Lin", "EG_P", "EG_MLE", "EpiEstim", "WP", "WT")
   
   # define peak - max time point of highest reported cases
   peak <- which.max(data$cases)[length(which.max(data$cases))] 
@@ -24,15 +24,15 @@ fit_R0_seq <- function(data, mean_GT, sd_GT, GTd, GT_week){
       s_t <- data[1:sections[t], ]
       
       # fit each method
-      exp_lin <- EG_Lin(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
-      exp_pois <- EG_P(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
-      exp_mle <- EG_MLE(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
+      eglin <- EG_Lin(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
+      egp <- EG_P(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
+      egmle <- EG_MLE(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
       epiest <- epiestim(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
       wp <- WP(data=s_t, GTd=GTd)
       wt <- WT(data=s_t, GTd=GTd)
       
       # store results
-      store[[t]] <- cbind(paste(data$country[1]), sections[t], methods, rbind(exp_lin, exp_pois, exp_mle, epiest, wp, wt))
+      store[[t]] <- cbind(paste(data$country[1]), sections[t], methods, rbind(eglin, egp, egmle, epiest, wp, wt))
       colnames(store[[t]]) <- c("Country", "Nweeks", "method", "R0", "CI_L", "CI_U")
     }
     
