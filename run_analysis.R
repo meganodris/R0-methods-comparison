@@ -45,7 +45,7 @@ for(i in 1:3){
                          country=paste("sim", j, sep='_'))
     
     # fit & store results
-    results_i[[j]] <- fit_R0_seq(data=sim_ij, mean_GT=20/7, sd_GT=7.4/7, GTd=GTd)
+    results_i[[j]] <- fit_R0_seq(data=sim_ij, mean_GT=20/7, sd_GT=7.4/7, GTd=GTd, GT_week=3)
   }
   
   # store results from each noise level
