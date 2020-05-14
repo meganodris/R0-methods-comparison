@@ -1,3 +1,4 @@
+library(dplyr)
 
 # root mean squared error
 rmse <- function(error){
@@ -10,19 +11,21 @@ mae <- function(error){
 }
 
 # summarise performance
-performance_metrics <- function(trueR0, estimates, max_weeks){
+performance_metrics <- function(trueR0, estimates, max_weeks, min_peak){
   
   # unlist & bind R0 estimates
-  estimates <- do.call('rbind', estimates)
+  #estimates <- do.call('rbind', estimates)
   estimates$sim <- substr(estimates$Country, 5, 7)
   
   # merge with actual/true R0 values
   trueR0$sim <- as.character(trueR0$sim)
   estimates <- left_join(estimates, trueR0, by='sim')
-  colnames(estimates)[c(4,8)] <- c('R0', 'R0_true')
+  colnames(estimates)[4] <- 'R0'
+  colnames(estimates)[which(colnames(estimates)=='R0.y')] <- 'R0_true'
   
   # subset analyses to the early epidemic growth phase, e.g. 15 weeks
-  estimates <- subset(estimates, estimates$Nweeks<=max_weeks)
+  estimates <- estimates[(estimates$Nweeks<=max_weeks & 
+                            estimates$peak>=min_peak), ]
   
   # remove sections of simulations with any missing R0 estimates (for systematic comparison across methods)
   missing <- as.data.frame(cbind(sim=estimates$sim[which(is.na(estimates$R0))],
@@ -72,8 +75,8 @@ performance_metrics <- function(trueR0, estimates, max_weeks){
       
       # errors 
       errors <- ests_tm$R0_true - ests_tm$R0
-      
-      # store results
+
+            # store results
       indx <- indx+1
       metrics[indx, ] <- c(paste(t), paste(method), r2, m, pears, spear, rmse(errors), mae(errors),
                            mean(ests_tm$ciW), (sum(ests_tm$covYN)/nrow(ests_tm)), mean(abs(ests_tm$bias)),
@@ -104,7 +107,7 @@ summary_plot <- function(metrics_summ, include){
   # plot
   met$Nweeks <- factor(met$Nweeks, levels=c(6,9,12,15))
   met$method <- factor(met$method, levels=c('ExpLin', 'ExpPois', 'MLE_ExpLin', 'EpiEstim', 'WP', 'WT'))
-  plotM <- ggplot(met, aes(Nweeks, as.numeric(value), colour=method, shape=method))+ geom_point()+ 
+  plotM <- ggplot(met, aes(Nweeks, as.numeric(value), colour=method, shape=method))+ geom_point(position=position_dodge(width=0.2))+ 
     facet_wrap(~metrics, scales="free_y")+ ylab('Performance')+ xlab('Number of weeks')+
     scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple"))
   
@@ -115,10 +118,11 @@ summary_plot <- function(metrics_summ, include){
 # bias distribution plot: estimated R0 - actual R0
 bias_plot <- function(metrics_indiv){
   
-  metrics_indiv$method <- factor(metrics_indiv$method, levels=c('ExpLin', 'ExpPois', 'MLE_ExpLin', 'EpiEstim', 'WP', 'WT'))
+  metrics_indiv$method <- factor(metrics_indiv$method, levels=c('EG_Lin', 'EG_P', 'EG_MLE', 'EpiEstim', 'WP', 'WT'))
   plotB <- ggplot(metrics_indiv)+ ylab('')+ scale_x_continuous(expand=c(0, 0))+ theme_minimal()+
-    geom_density_ridges(aes(x=bias, y=method, fill=method, col=method), scale=0.95, alpha=0.5, bandwidth=0.25)+
-    facet_grid(~Nweeks)+ geom_vline(xintercept=0)+ xlab('bias')+ 
+    geom_density_ridges(aes(x=bias, y=factor(method), fill=method, col=method), scale=0.95, alpha=0.25, bandwidth=0.28,
+                        quantile_lines=2, quantiles=2)+
+    facet_grid(~Nweeks)+ geom_vline(xintercept=0, linetype='dashed')+ xlab('bias')+ 
     scale_fill_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple"))+
     scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple"))+
     theme(legend.position='right', axis.text.y=element_blank(), axis.ticks.y=element_blank())+ 
