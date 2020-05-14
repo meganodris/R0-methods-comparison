@@ -84,7 +84,7 @@ EG_MLE <- function(data, mean_GT, sd_GT){
   # run MLE from different starting points
   for(m in 1:250){
     
-    tryCatch({ # catch errors arising from negative r values and filter these before storing results
+    suppressWarnings(tryCatch({ # catch errors arising from negative r values and filter these before storing results
       est <- mle2(ll, start=list(I0=runif(1,1,10), r=runif(1,1,10)))
       
       # store values of r, likelihood & CI
@@ -92,7 +92,7 @@ EG_MLE <- function(data, mean_GT, sd_GT){
       likel[m] <- logLik(est)
       CI_mle[m, ] <- c(confint(est, quietly=TRUE)[2,1], confint(est, quietly=TRUE)[2,2])
       rm(est)
-    }, error=function(e){print(paste("Exponential growth (MLE): Unable to estimate R0 with current data"))})
+    }, error=function(e){}))
   } 
   
   # take maximum likelihood estimates
