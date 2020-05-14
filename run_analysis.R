@@ -94,7 +94,7 @@ for(i in 1:length(zika_LAC)){
   GTd <- R0::generation.time("gamma", c(20/7, 7.4/7))
   
   # fit & store results
-  LAC_results[[i]] <- fit_R0_seq(data=data_i, mean_GT=20/7, sd_GT=7.4/7, GTd=GTd)
+  LAC_results[[i]] <- fit_R0_seq(data=data_i, mean_GT=20/7, sd_GT=7.4/7, GTd=GTd, GT_week=3)
   
   print(paste("Finished", data_i$country[1], sep=" "))
 }
