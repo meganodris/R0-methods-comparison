@@ -14,7 +14,7 @@ mae <- function(error){
 performance_metrics <- function(trueR0, estimates, max_weeks, min_peak){
   
   # unlist & bind R0 estimates
-  #estimates <- do.call('rbind', estimates)
+  estimates <- do.call('rbind', estimates)
   estimates$sim <- substr(estimates$Country, 5, 7)
   
   # merge with actual/true R0 values
@@ -106,7 +106,7 @@ summary_plot <- function(metrics_summ, include){
   
   # plot
   met$Nweeks <- factor(met$Nweeks, levels=c(6,9,12,15))
-  met$method <- factor(met$method, levels=c('ExpLin', 'ExpPois', 'MLE_ExpLin', 'EpiEstim', 'WP', 'WT'))
+  met$method <- factor(met$method, levels=c('EG_Lin', 'EG_P', 'EG_MLE', 'EpiEstim', 'WP', 'WT'))
   plotM <- ggplot(met, aes(Nweeks, as.numeric(value), colour=method, shape=method))+ geom_point(position=position_dodge(width=0.2))+ 
     facet_wrap(~metrics, scales="free_y")+ ylab('Performance')+ xlab('Number of weeks')+
     scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple"))

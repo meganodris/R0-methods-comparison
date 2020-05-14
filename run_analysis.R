@@ -14,6 +14,7 @@ setwd(repo_path)
 source('methods.R')
 source('fit_R0_seq.R')
 source('data_simulation.R')
+source('assess_performance.R')
 
 
 #===== 1. Fit to simulated data with varying levels of random noise =====#
@@ -51,6 +52,18 @@ for(i in 1:3){
   # store results from each noise level
   Sim_results[[i]] <- results_i
 }
+
+
+# calculate performance metrics
+metrics <- performance_metrics(trueR0=simulations$pars, estimates=Sim_results[[i]], max_weeks=15, min_peak=15)
+
+# choose metrics to plot
+get_metrics()
+want <- c('Bias','Coverage','Uncertainty','RMSE')
+
+# metrics summary plot & bias plot
+SummPlot <- summary_plot(metrics$metrics_summ, include=want)
+BPlot <- bias_plot(metrics$metrics_indiv)
 
 
 
