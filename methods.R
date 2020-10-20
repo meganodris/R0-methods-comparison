@@ -75,37 +75,20 @@ EG_MLE <- function(data, mean_GT, sd_GT){
   ll <- function(I0, r){
     -sum(data$cases*(r*data$week+log(I0))-I0*exp(r*data$week)-lfactorial(data$cases))
   }
-  
-  # vectors & matrix for storing r, likelihood & CI estimates
-  r_est <- vector()
-  likel <- vector()
-  CI_mle <- data.frame(matrix(ncol=2, nrow=100))
-  
-  # run MLE from different starting points
-  for(m in 1:250){
-    
-    suppressWarnings(tryCatch({ # catch errors arising from negative r values and filter these before storing results
-      est <- mle2(ll, start=list(I0=runif(1,1,10), r=runif(1,1,10)))
-      
-      # store values of r, likelihood & CI
-      r_est[m] <- coef(est)[2]
-      likel[m] <- logLik(est)
-      CI_mle[m, ] <- c(confint(est, quietly=TRUE)[2,1], confint(est, quietly=TRUE)[2,2])
-      rm(est)
-    }, error=function(e){}))
-  } 
-  
-  # take maximum likelihood estimates
-  r_mle <- r_est[which.max(likel)]
-  ci_mle <- CI_mle[which.max(likel), ]
+        
+  tryCatch({
+    est <- mle2(ll, start=list(I0=1, r=0.2))
+    r_mle <- coef(est)[2]
+    ci_mle <- c(confint(est, quietly=TRUE)[2,1], confint(est, quietly=TRUE)[2,2])
+  }, error=function(e){print(paste("EG_MLE: Unable to estimate R0 with current data"))})
   
   # check the validity of results (i.e. not NA & are above min_r)
   if(is.na(ci_mle[1])+is.na(ci_mle[2])==0 & ci_mle[1]>-0.38){
     
     # calculate R by integrating over the GT distribution, g(a)
     R <- 1/(integrate(Mz_ga, r=r_mle, lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT))$value
-    R_CIL <- 1/(integrate(Mz_ga, r=CI_mle[1,1], lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT))$value
-    R_CIU <- 1/(integrate(Mz_ga, r=CI_mle[1,2], lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT))$value
+    R_CIL <- 1/(integrate(Mz_ga, r=ci_mle[1], lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT))$value
+    R_CIU <- 1/(integrate(Mz_ga, r=ci_mle[2], lower=0, upper=Inf, subdivisions=1e8, mean_GT=mean_GT, sd_GT=sd_GT))$value
     
     results <- c(R, R_CIL, R_CIU)
     
@@ -167,6 +150,28 @@ WT <- function(data, GTd){
   
   if(exists("R0_WTav")==TRUE){
     results <- c(R0_WTav$R, R0_WTav$conf.int)
+  }else{
+    results <- c(NA, NA, NA)
+  }
+  return(results)
+}
+
+#== 7. Bettencourt & Ribeiro method
+
+BR <- function(data, GTd){
+  
+  tryCatch({
+    
+    # estimate time-dependant R0
+    R0_BR <- R0::est.R0.SB(data$cases, GT=GTd, begin=1, end=as.numeric(nrow(data)))
+
+    # smooth the time-dependant estimates across period of interest
+    R0_BRav <- R0::smooth.Rt(R0_BR, time.period=(nrow(data)-1))
+    
+  }, error=function(e){print(paste("Bettencourt & Ribeiro: Unable to estimate R0 with current data"))})
+  
+  if(exists("R0_BRav")==TRUE){
+    results <- c(R0_BRav$R, R0_BRav$conf.int)
   }else{
     results <- c(NA, NA, NA)
   }
