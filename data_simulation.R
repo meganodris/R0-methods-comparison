@@ -52,7 +52,7 @@ simulate_data <- function(N, gamma, sigma){
   timestep <- seq(0, 2*365) 
   
   # assuming that 20% of infections result in reported cases 
-  Reporting_fraction <- 0.20
+  Reporting_fraction <- 0.2
   
   # dataframes to store simulations
   sim_data <- data.frame(matrix(ncol=N, nrow=105))
