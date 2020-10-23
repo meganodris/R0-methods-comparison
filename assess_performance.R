@@ -106,10 +106,11 @@ summary_plot <- function(metrics_summ, include){
   
   # plot
   met$Nweeks <- factor(met$Nweeks, levels=c(6,9,12,15))
-  met$method <- factor(met$method, levels=c('EG_Lin', 'EG_P', 'EG_MLE', 'EpiEstim', 'WP', 'WT'))
+  met$method <- factor(met$method, levels=c('EG_Lin', 'EG_P', 'EG_MLE', 'EpiEstim', 'WP', 'WT', 'BR'))
   plotM <- ggplot(met, aes(Nweeks, as.numeric(value), colour=method, shape=method))+ geom_point(position=position_dodge(width=0.2))+ 
     facet_wrap(~metrics, scales="free_y")+ ylab('Performance')+ xlab('Number of weeks')+
-    scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple"))
+    scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple", "grey60"))+
+    scale_shape_manual(values=c(16,17,15,3,7,8,10))
   
   return(plotM)
 }
@@ -118,13 +119,13 @@ summary_plot <- function(metrics_summ, include){
 # bias distribution plot: estimated R0 - actual R0
 bias_plot <- function(metrics_indiv){
   
-  metrics_indiv$method <- factor(metrics_indiv$method, levels=c('EG_Lin', 'EG_P', 'EG_MLE', 'EpiEstim', 'WP', 'WT'))
+  metrics_indiv$method <- factor(metrics_indiv$method, levels=c('EG_Lin', 'EG_P', 'EG_MLE', 'EpiEstim', 'WP', 'WT', 'BR'))
   plotB <- ggplot(metrics_indiv)+ ylab('')+ scale_x_continuous(expand=c(0, 0))+ theme_minimal()+
     geom_density_ridges(aes(x=bias, y=factor(method), fill=method, col=method), scale=0.95, alpha=0.25, bandwidth=0.28,
                         quantile_lines=2, quantiles=2)+
     facet_grid(~Nweeks)+ geom_vline(xintercept=0, linetype='dashed')+ xlab('bias')+ 
-    scale_fill_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple"))+
-    scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple"))+
+    scale_fill_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple", "grey60"))+
+    scale_colour_manual(values=c("royalblue1", "violetred1", "lawngreen", "orange1", "turquoise1", "purple", "grey60"))+
     theme(legend.position='right', axis.text.y=element_blank(), axis.ticks.y=element_blank())+ 
     scale_y_discrete(expand=expand_scale(mult=c(0.01, 0.01)), limits=rev(levels(metrics_indiv$method)))
   
