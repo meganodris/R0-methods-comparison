@@ -1,5 +1,6 @@
 ## R0-methods-comparison
 
+Code and data to reproduce the analysis in "A comparative analysis of statistical methods to estimate the reproduction number in emerging epidemics with implications for the current COVID-19 pandemic", https://doi.org/10.1093/cid/ciaa1599.
 
 ***Code***
 - 'run_analysis.R' is the core R script to reproduce all key analyses.
