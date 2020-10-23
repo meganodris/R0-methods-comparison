@@ -7,12 +7,12 @@ fit_R0_seq <- function(data, mean_GT, sd_GT, GTd, GT_week){
   store <- list()
   
   # method names
-  methods <- c("EG_Lin", "EG_P", "EG_MLE", "EpiEstim", "WP", "WT")
+  methods <- c("EG_Lin", "EG_P", "EG_MLE", "EpiEstim", "WP", "WT", 'BR')
   
   # define peak - max time point of highest reported cases
   peak <- which.max(data$cases)[length(which.max(data$cases))] 
   
-  if(peak>=6){
+  if(peak>=15){
     
     # define sections: from 2 generation times (approximated in terms of weeks) on, up to peak
     sections <- seq(from=GT_week*2, to=peak, by=GT_week)
@@ -30,9 +30,10 @@ fit_R0_seq <- function(data, mean_GT, sd_GT, GTd, GT_week){
       epiest <- epiestim(data=s_t, mean_GT=mean_GT, sd_GT=sd_GT)
       wp <- WP(data=s_t, GTd=GTd)
       wt <- WT(data=s_t, GTd=GTd)
+      br <- BR(data=s_t, GTd=GTd)
       
       # store results
-      store[[t]] <- cbind(paste(data$country[1]), sections[t], methods, rbind(eglin, egp, egmle, epiest, wp, wt), peak)
+      store[[t]] <- cbind(paste(data$country[1]), sections[t], methods, rbind(eglin, egp, egmle, epiest, wp, wt, br), peak)
       colnames(store[[t]]) <- c("Country", "Nweeks", "method", "R0", "CI_L", "CI_U", "peak")
     }
     
