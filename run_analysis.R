@@ -35,11 +35,11 @@ Sim_results <- list()
 # for each of the 3 noise levels
 for(i in 1:3){ 
   
+  # list for storage
+  results_i <- list()
+  
   # for each of the 250 simulations
   for(j in 1:ncol(simulations$sims)){ 
-    
-    # list for storage
-    results_i <- list()
     
     # data for fitting - simulation j with noise level i
     sim_ij <- data.frame(week=1:nrow(simulations[[i]]), cases=simulations[[i]][ ,j], 
@@ -95,7 +95,6 @@ for(i in 1:length(zika_LAC)){
   
   # fit & store results
   LAC_results[[i]] <- fit_R0_seq(data=data_i, mean_GT=20/7, sd_GT=7.4/7, GTd=GTd, GT_week=3)
-  
   print(paste("Finished", data_i$country[1], sep=" "))
 }
 
